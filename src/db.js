@@ -4,6 +4,11 @@ const { Pool, Client, types } = require("pg");
 // DATE ustunini "YYYY-MM-DD" satr sifatida qaytarish (vaqt zonasi siljishisiz)
 types.setTypeParser(1082, (v) => v);
 
+// DATABASE_URL berilsa (masalan Railway), shu ishlatiladi; aks holda PG* o'zgaruvchilar
+const DATABASE_URL = process.env.DATABASE_URL;
+// PGSSL=true — tashqi (public) ulanishda SSL kerak bo'lsa
+const ssl = process.env.PGSSL === "true" ? { rejectUnauthorized: false } : undefined;
+
 const config = {
   host: process.env.PGHOST || "localhost",
   port: Number(process.env.PGPORT || 5432),
@@ -12,11 +17,15 @@ const config = {
 };
 const DB_NAME = process.env.PGDATABASE || "letters_db";
 
-const pool = new Pool({ ...config, database: DB_NAME });
+const pool = DATABASE_URL
+  ? new Pool({ connectionString: DATABASE_URL, ssl })
+  : new Pool({ ...config, database: DB_NAME, ssl });
 
-// Baza bo'lmasa yaratadi (postgres tizim bazasiga ulanib)
+// Baza bo'lmasa yaratadi (postgres tizim bazasiga ulanib).
+// DATABASE_URL bilan baza allaqachon tayyor (Railway yaratib bergan), shuning uchun o'tkazib yuboriladi.
 async function ensureDatabase() {
-  const client = new Client({ ...config, database: "postgres" });
+  if (DATABASE_URL) return;
+  const client = new Client({ ...config, database: "postgres", ssl });
   await client.connect();
   try {
     const { rowCount } = await client.query(
