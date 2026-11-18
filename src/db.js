@@ -5,7 +5,10 @@ const { Pool, Client, types } = require("pg");
 types.setTypeParser(1082, (v) => v);
 
 // DATABASE_URL berilsa (masalan Railway), shu ishlatiladi; aks holda PG* o'zgaruvchilar
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  process.env.DATABASE_PRIVATE_URL ||
+  process.env.DATABASE_PUBLIC_URL;
 // PGSSL=true — tashqi (public) ulanishda SSL kerak bo'lsa
 const ssl = process.env.PGSSL === "true" ? { rejectUnauthorized: false } : undefined;
 
@@ -76,7 +79,27 @@ async function ensureSchema() {
   console.log("[db] letters jadvali tayyor");
 }
 
+// Qaysi bazaga ulanayotganini parolsiz ko'rsatadi (deploy xatolarini topish uchun)
+function describeTarget() {
+  const present = Object.keys(process.env)
+    .filter((k) => /^(DATABASE_|PG)/.test(k) && process.env[k])
+    .join(", ") || "yo'q";
+  let target;
+  if (DATABASE_URL) {
+    try {
+      const u = new URL(DATABASE_URL);
+      target = `DATABASE_URL -> ${u.hostname}:${u.port || 5432}${u.pathname}`;
+    } catch {
+      target = "DATABASE_URL (noto'g'ri formatda!)";
+    }
+  } else {
+    target = `PG* -> ${config.host}:${config.port}/${DB_NAME}`;
+  }
+  console.log(`[db] ulanish: ${target} | mavjud o'zgaruvchilar: ${present}`);
+}
+
 async function initDb() {
+  describeTarget();
   await ensureDatabase();
   await ensureSchema();
 }
