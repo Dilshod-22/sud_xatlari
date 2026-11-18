@@ -10,7 +10,7 @@ const DATABASE_URL =
   process.env.DATABASE_PRIVATE_URL ||
   process.env.DATABASE_PUBLIC_URL;
 // PGSSL=true — tashqi (public) ulanishda SSL kerak bo'lsa
-const ssl = process.env.PGSSL === "true" ? { rejectUnauthorized: false } : undefined;
+const ssl = process.env.PGSSL ===  "true" ? { rejectUnauthorized: false } : undefined;
 
 const config = {
   host: process.env.PGHOST || "localhost",
