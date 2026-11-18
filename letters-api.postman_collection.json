@@ -1,0 +1,365 @@
+{
+  "info": {
+    "name": "Letters API — Testlar",
+    "description": "Letters API uchun avtomatik testlar. So'rovlar bir-biriga bog'liq, shuning uchun tartib bilan ishga tushiring (Collection Runner yoki `postman collection run`).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "timestamp",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Muvaffaqiyatli holatlar",
+      "item": [
+        {
+          "name": "Xatni saqlash (201)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Har safar yangi, takrorlanmas timestamp",
+                  "pm.collectionVariables.set('timestamp', Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "const res = pm.response.json();",
+                  "",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('id qaytdi', () => pm.expect(res.id).to.be.a('number'));",
+                  "pm.test(\"timestamp to'g'ri\", () => pm.expect(res.timestamp).to.eql(body.timestamp));",
+                  "pm.test(\"name, content va issuedDate to'g'ri\", () => {",
+                  "  pm.expect(res.name).to.eql(body.name);",
+                  "  pm.expect(res.content).to.eql(body.content);",
+                  "  pm.expect(res.issuedDate).to.eql(body.issuedDate);",
+                  "});",
+                  "pm.test(\"company rekvizitlari to'g'ri\", () => pm.expect(res.company).to.eql(body.company));",
+                  "pm.test(\"courtAddresses to'g'ri\", () => pm.expect(res.courtAddresses).to.eql(body.courtAddresses));",
+                  "pm.test('createdAt bor', () => pm.expect(res.createdAt).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": {{timestamp}},\n  \"name\": \"Qarzdorlik bo'yicha ogohlantirish xati\",\n  \"content\": \"Hurmatli mijoz! Sizning shartnoma boʻyicha muddati oʻtgan qarzdorligingiz mavjud.\\nUshbu xat olingan kundan boshlab 10 kun ichida qarzni toʻlashingizni soʻraymiz.\\nAks holda masala sud tartibida hal qilinadi.\",\n  \"issuedDate\": \"2026-10-14\",\n  \"company\": {\n    \"name\": \"LONG SHOT\",\n    \"director\": \"И.И.Қодиров\",\n    \"bank\": \"АТБ \\\"Trastbank\\\"\",\n    \"phone\": \"+998 (97) 373-17-71\",\n    \"account\": \"20208000407161435001\",\n    \"mfo\": \"00491\",\n    \"stir\": \"311688181\",\n    \"address\": \"CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy\",\n    \"branch\": \"Чирчик\"\n  },\n  \"courtAddresses\": [\n    \"Toshkent viloyati, Chirchiq shahar fuqarolik ishlari bo'yicha sudi\",\n    \"Toshkent viloyati iqtisodiy sudi\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Xatni timestamp bo'yicha olish (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test(\"Shu timestamp'li xat qaytdi\", () => pm.expect(res.timestamp).to.eql(Number(pm.collectionVariables.get('timestamp'))));",
+                  "pm.test('issuedDate YYYY-MM-DD formatda', () => pm.expect(res.issuedDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/));",
+                  "pm.test('Rekvizitlar saqlangan', () => {",
+                  "  pm.expect(res.company.name).to.eql('LONG SHOT');",
+                  "  pm.expect(res.company.stir).to.eql('311688181');",
+                  "  pm.expect(res.company.mfo).to.eql('00491');",
+                  "  pm.expect(res.company.account).to.eql('20208000407161435001');",
+                  "});",
+                  "pm.test('Xat matni saqlangan', () => pm.expect(res.content).to.include('qarzdorligingiz'));",
+                  "pm.test('Sud manzillari saqlangan', () => pm.expect(res.courtAddresses).to.have.lengthOf(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/letters/{{timestamp}}"
+          }
+        },
+        {
+          "name": "Faqat majburiy maydonlar bilan saqlash (201)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Har safar yangi, takrorlanmas timestamp",
+                  "pm.collectionVariables.set('timestamp', Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Ixtiyoriy maydonlar null', () => {",
+                  "  pm.expect(res.company.director).to.be.null;",
+                  "  pm.expect(res.company.stir).to.be.null;",
+                  "});",
+                  "pm.test(\"courtAddresses bo'sh massiv\", () => pm.expect(res.courtAddresses).to.eql([]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": {{timestamp}},\n  \"name\": \"Minimal xat\",\n  \"content\": \"Qisqa xat matni\",\n  \"issuedDate\": \"2026-10-14\",\n  \"company\": {\n    \"name\": \"LONG SHOT\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Xatolik holatlari",
+      "item": [
+        {
+          "name": "Takroriy timestamp (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Xato xabari bor', () => pm.expect(pm.response.json().error).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": {{timestamp}},\n  \"name\": \"Qarzdorlik bo'yicha ogohlantirish xati\",\n  \"content\": \"Hurmatli mijoz! Sizning shartnoma boʻyicha muddati oʻtgan qarzdorligingiz mavjud.\\nUshbu xat olingan kundan boshlab 10 kun ichida qarzni toʻlashingizni soʻraymiz.\\nAks holda masala sud tartibida hal qilinadi.\",\n  \"issuedDate\": \"2026-10-14\",\n  \"company\": {\n    \"name\": \"LONG SHOT\",\n    \"director\": \"И.И.Қодиров\",\n    \"bank\": \"АТБ \\\"Trastbank\\\"\",\n    \"phone\": \"+998 (97) 373-17-71\",\n    \"account\": \"20208000407161435001\",\n    \"mfo\": \"00491\",\n    \"stir\": \"311688181\",\n    \"address\": \"CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy\",\n    \"branch\": \"Чирчик\"\n  },\n  \"courtAddresses\": [\n    \"Toshkent viloyati, Chirchiq shahar fuqarolik ishlari bo'yicha sudi\",\n    \"Toshkent viloyati iqtisodiy sudi\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Majburiy maydonlarsiz (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('4 ta xato qaytdi', () => pm.expect(res.errors).to.have.lengthOf(4));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Faqat nom\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Xat matnisiz (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('content xatosi', () => pm.expect(pm.response.json().errors.join(' ')).to.include('content'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": 1,\n  \"name\": \"Qarzdorlik bo'yicha ogohlantirish xati\",\n  \"issuedDate\": \"2026-10-14\",\n  \"company\": {\n    \"name\": \"LONG SHOT\",\n    \"director\": \"И.И.Қодиров\",\n    \"bank\": \"АТБ \\\"Trastbank\\\"\",\n    \"phone\": \"+998 (97) 373-17-71\",\n    \"account\": \"20208000407161435001\",\n    \"mfo\": \"00491\",\n    \"stir\": \"311688181\",\n    \"address\": \"CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy\",\n    \"branch\": \"Чирчик\"\n  },\n  \"courtAddresses\": [\n    \"Toshkent viloyati, Chirchiq shahar fuqarolik ishlari bo'yicha sudi\",\n    \"Toshkent viloyati iqtisodiy sudi\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Noto'g'ri timestamp (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('timestamp xatosi', () => pm.expect(pm.response.json().errors.join(' ')).to.include('timestamp'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": \"abc\",\n  \"name\": \"Qarzdorlik bo'yicha ogohlantirish xati\",\n  \"content\": \"Hurmatli mijoz! Sizning shartnoma boʻyicha muddati oʻtgan qarzdorligingiz mavjud.\\nUshbu xat olingan kundan boshlab 10 kun ichida qarzni toʻlashingizni soʻraymiz.\\nAks holda masala sud tartibida hal qilinadi.\",\n  \"issuedDate\": \"2026-10-14\",\n  \"company\": {\n    \"name\": \"LONG SHOT\",\n    \"director\": \"И.И.Қодиров\",\n    \"bank\": \"АТБ \\\"Trastbank\\\"\",\n    \"phone\": \"+998 (97) 373-17-71\",\n    \"account\": \"20208000407161435001\",\n    \"mfo\": \"00491\",\n    \"stir\": \"311688181\",\n    \"address\": \"CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy\",\n    \"branch\": \"Чирчик\"\n  },\n  \"courtAddresses\": [\n    \"Toshkent viloyati, Chirchiq shahar fuqarolik ishlari bo'yicha sudi\",\n    \"Toshkent viloyati iqtisodiy sudi\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Noto'g'ri sana (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('issuedDate xatosi', () => pm.expect(pm.response.json().errors.join(' ')).to.include('issuedDate'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": 1,\n  \"name\": \"Qarzdorlik bo'yicha ogohlantirish xati\",\n  \"content\": \"Hurmatli mijoz! Sizning shartnoma boʻyicha muddati oʻtgan qarzdorligingiz mavjud.\\nUshbu xat olingan kundan boshlab 10 kun ichida qarzni toʻlashingizni soʻraymiz.\\nAks holda masala sud tartibida hal qilinadi.\",\n  \"issuedDate\": \"bugun\",\n  \"company\": {\n    \"name\": \"LONG SHOT\",\n    \"director\": \"И.И.Қодиров\",\n    \"bank\": \"АТБ \\\"Trastbank\\\"\",\n    \"phone\": \"+998 (97) 373-17-71\",\n    \"account\": \"20208000407161435001\",\n    \"mfo\": \"00491\",\n    \"stir\": \"311688181\",\n    \"address\": \"CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy\",\n    \"branch\": \"Чирчик\"\n  },\n  \"courtAddresses\": [\n    \"Toshkent viloyati, Chirchiq shahar fuqarolik ishlari bo'yicha sudi\",\n    \"Toshkent viloyati iqtisodiy sudi\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "courtAddresses massiv emas (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('courtAddresses xatosi', () => pm.expect(pm.response.json().errors.join(' ')).to.include('courtAddresses'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/letters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": 1,\n  \"name\": \"Qarzdorlik bo'yicha ogohlantirish xati\",\n  \"content\": \"Hurmatli mijoz! Sizning shartnoma boʻyicha muddati oʻtgan qarzdorligingiz mavjud.\\nUshbu xat olingan kundan boshlab 10 kun ichida qarzni toʻlashingizni soʻraymiz.\\nAks holda masala sud tartibida hal qilinadi.\",\n  \"issuedDate\": \"2026-10-14\",\n  \"company\": {\n    \"name\": \"LONG SHOT\",\n    \"director\": \"И.И.Қодиров\",\n    \"bank\": \"АТБ \\\"Trastbank\\\"\",\n    \"phone\": \"+998 (97) 373-17-71\",\n    \"account\": \"20208000407161435001\",\n    \"mfo\": \"00491\",\n    \"stir\": \"311688181\",\n    \"address\": \"CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy\",\n    \"branch\": \"Чирчик\"\n  },\n  \"courtAddresses\": \"Chirchiq sudi\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mavjud bo'lmagan timestamp (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/letters/1"
+          }
+        },
+        {
+          "name": "Son bo'lmagan timestamp (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/letters/abc"
+          }
+        }
+      ]
+    }
+  ]
+}

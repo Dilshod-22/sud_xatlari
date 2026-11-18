@@ -1,0 +1,20 @@
+{
+  "timestamp": 1760428800000,
+  "name": "Qarzdorlik bo'yicha ogohlantirish xati",
+  "content": "Hurmatli mijoz! Sizning shartnoma boʻyicha muddati oʻtgan qarzdorligingiz mavjud.\nUshbu xat olingan kundan boshlab 10 kun ichida qarzni toʻlashingizni soʻraymiz.\nAks holda masala sud tartibida hal qilinadi.",
+  "issuedDate": "2026-10-14",
+  "company": {
+    "name": "LONG SHOT",
+    "director": "И.И.Қодиров",
+    "bank": "АТБ \"Trastbank\"",
+    "phone": "+998 (97) 373-17-71",
+    "account": "20208000407161435001",
+    "mfo": "00491",
+    "stir": "311688181",
+    "address": "CHirchiq sh. Chirchiq 50-Yillig shox ko`chasi 29-uy",
+    "branch": "Чирчик"
+  },
+  "courtAddresses": [
+    "Toshkent viloyati, Chirchiq shahar fuqarolik ishlari bo'yicha sudi, ..."
+  ]
+}

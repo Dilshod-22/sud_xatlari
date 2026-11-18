@@ -1,0 +1,16 @@
+{
+  "name": "letters-api",
+  "version": "1.0.0",
+  "description": "Xatlar ma'lumotlarini saqlash va timestamp bo'yicha olish uchun API (PostgreSQL)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "db:init": "node src/db-init.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
+  }
+}
