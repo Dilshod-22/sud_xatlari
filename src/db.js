@@ -96,6 +96,18 @@ function describeTarget() {
     target = `PG* -> ${config.host}:${config.port}/${DB_NAME}`;
   }
   console.log(`[db] ulanish: ${target} | mavjud o'zgaruvchilar: ${present}`);
+  // Railway o'zi beradigan ma'lumotlar: qaysi servis/environment'da ishlayapmiz
+  const e = process.env;
+  if (e.RAILWAY_SERVICE_NAME || e.RAILWAY_ENVIRONMENT_NAME) {
+    const userVars = Object.keys(e).filter(
+      (k) => !k.startsWith("RAILWAY_") && !k.startsWith("npm_") && !k.startsWith("NIXPACKS_")
+    );
+    console.log(
+      `[railway] servis: ${e.RAILWAY_SERVICE_NAME} | environment: ${e.RAILWAY_ENVIRONMENT_NAME}` +
+        ` | loyiha: ${e.RAILWAY_PROJECT_NAME} | commit: ${(e.RAILWAY_GIT_COMMIT_SHA || "").slice(0, 7)}`
+    );
+    console.log(`[railway] boshqa o'zgaruvchilar (nomlari): ${userVars.sort().join(", ")}`);
+  }
 }
 
 async function initDb() {
