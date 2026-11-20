@@ -43,6 +43,10 @@ Majburiy maydonlar: `timestamp`, `name`, `content` (xat matni), `issuedDate`, `c
 
 Javoblar: `201` saqlandi, `400` maydonlarda xato bor, `409` bu timestamp bilan xat allaqachon bor.
 
+### `GET /api/letters` — barcha xatlar
+
+Barcha xatlarni massiv ko'rinishida qaytaradi (eng yangisi birinchi). Har bir element `GET /api/letters/:timestamp` javobi bilan bir xil formatda. Xat bo'lmasa — `[]`.
+
 ### `GET /api/letters/:timestamp` — xatni olish
 
 Yuqoridagi formatda xatni qaytaradi (qo'shimcha ravishda `id` va `createdAt` ham keladi). Xat topilmasa `404`.

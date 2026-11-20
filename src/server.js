@@ -93,6 +93,17 @@ app.post("/api/letters", async (req, res) => {
   }
 });
 
+// GET /api/letters — barcha xatlar (eng yangisi birinchi)
+app.get("/api/letters", async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM letters ORDER BY created_at DESC, id DESC");
+    res.json(rows.map(toLetter));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server xatosi" });
+  }
+});
+
 // GET /api/letters/:timestamp — timestamp bo'yicha xatni olish
 app.get("/api/letters/:timestamp", async (req, res) => {
   const ts = req.params.timestamp;
